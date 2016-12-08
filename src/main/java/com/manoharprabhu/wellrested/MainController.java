@@ -23,7 +23,7 @@ public class MainController {
     @PostConstruct
     public void initialize() {
         if(Configuration.databaseType == DatabaseType.MYSQL) {
-            this.databaseService = new MySQLDatabaseServiceImpl(null);
+            this.databaseService = new MySQLDatabaseServiceImpl();
         } else {
             //TODO: Add more database support
         }
