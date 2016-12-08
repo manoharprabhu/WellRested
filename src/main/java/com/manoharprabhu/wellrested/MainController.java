@@ -2,13 +2,14 @@ package com.manoharprabhu.wellrested;
 
 import com.manoharprabhu.wellrested.service.DatabaseService;
 import com.manoharprabhu.wellrested.service.MySQLDatabaseServiceImpl;
+import com.manoharprabhu.wellrested.vo.Column;
 import com.manoharprabhu.wellrested.vo.Table;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.manoharprabhu.wellrested.vo.TableRow;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.xml.ws.Response;
 import java.util.List;
 
 /**
@@ -22,13 +23,17 @@ public class MainController {
     @PostConstruct
     public void initialize() {
         if(Configuration.databaseType == DatabaseType.MYSQL) {
-            this.databaseService = new MySQLDatabaseServiceImpl();
+            this.databaseService = new MySQLDatabaseServiceImpl(null);
         } else {
-
+            //TODO: Add more database support
         }
     }
 
-    @RequestMapping("/")
+    /**
+     * List the tables available for the selected database
+     * @return List of tables
+     */
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public List<Table> listOfAvailableTables() {
         return databaseService.getListOfAvailableTables(
                 Configuration.database,
@@ -37,6 +42,24 @@ public class MainController {
                 Configuration.username,
                 Configuration.password
         );
+    }
+
+    @RequestMapping(value = "/{table}/columns", method = RequestMethod.GET)
+    public List<Column> listOfColumnsOnTable(@PathVariable("table") String table) {
+        return databaseService.getColumnInformationForTable(
+                table,
+                Configuration.database,
+                Configuration.hostName,
+                Configuration.port,
+                Configuration.username,
+                Configuration.password
+        );
+    }
+
+    @RequestMapping(value = "/{table}/data", method = RequestMethod.POST)
+    public List<TableRow> selectDataFromTable(@PathVariable("table") String table, @RequestBody String payload) {
+
+        return null;
     }
 
 }
