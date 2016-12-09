@@ -23,6 +23,13 @@ import org.json.JSONObject;
  * {$or : [SINGLE_CONDITION, MULTIPLE_CONDITION, ...] }
  */
 public class WhereClauseBuilder {
+    private static final String $_AND = "$and";
+    public static final String $_OR = "$or";
+    public static final String $_EQ = "$eq";
+    public static final String $_GT = "$gt";
+    public static final String $_LT = "$lt";
+    public static final String AND = "AND";
+    public static final String OR = "OR";
     private JSONObject clauseJson;
 
     public WhereClauseBuilder(JSONObject clauseJson) {
@@ -38,32 +45,12 @@ public class WhereClauseBuilder {
             return null;
         }
 
-        if(root.keySet().contains("$and")) {
+        if(root.keySet().contains($_AND)) {
             // Loop through the value array and build expression for each value with AND separator
-            JSONArray conditionsArray = root.getJSONArray("$and");
-            StringBuilder result = new StringBuilder(" ( ");
-            for(int i = 0; i < conditionsArray.length(); i++) {
-                String parsed = this._build(conditionsArray.getJSONObject(i));
-                result.append(" ").append(parsed);
-                if(i != conditionsArray.length() - 1) {
-                    result.append(" AND ");
-                }
-            }
-            result.append(" ) ");
-            return result.toString();
-        } else if(root.keySet().contains("$or")) {
+            return this.generateExpression(root, AND, $_AND);
+        } else if(root.keySet().contains($_OR)) {
             // Loop through the value array and build expression for each value with AND separator
-            JSONArray conditionsArray = root.getJSONArray("$or");
-            StringBuilder result = new StringBuilder(" ( ");
-            for(int i = 0; i < conditionsArray.length(); i++) {
-                String parsed = this._build(conditionsArray.getJSONObject(i));
-                result.append(" ").append(parsed);
-                if(i != conditionsArray.length() - 1) {
-                    result.append(" OR ");
-                }
-            }
-            result.append(" ) ");
-            return result.toString();
+            return this.generateExpression(root, OR, $_OR);
         } else {
             // Parse and return the single expression value
             String columnName = this.getFirstAttributeName(root);
@@ -71,12 +58,12 @@ public class WhereClauseBuilder {
             if(this.doesObjectContainMultipleAttribute(conditionJson)) {
                 return null;
             }
-            if(conditionJson.keySet().contains("$eq")) {
-                return " ( " + columnName + " = " + conditionJson.get("$eq") + " ) ";
-            } else if(conditionJson.keySet().contains("$gt")) {
-                return " ( " + columnName + " > " + conditionJson.get("$gt") + " ) ";
-            } else if(conditionJson.keySet().contains("$lt")) {
-                return " ( " + columnName + " < " + conditionJson.get("$lt") + " ) ";
+            if(conditionJson.keySet().contains($_EQ)) {
+                return this.buildSimpleExpression(columnName, " = ", conditionJson.get($_EQ));
+            } else if(conditionJson.keySet().contains($_GT)) {
+                return this.buildSimpleExpression(columnName, " > ", conditionJson.get($_GT));
+            } else if(conditionJson.keySet().contains($_LT)) {
+                return this.buildSimpleExpression(columnName, " < ", conditionJson.get($_LT));
             } else {
                 return null;
             }
@@ -89,5 +76,27 @@ public class WhereClauseBuilder {
 
      private String getFirstAttributeName(JSONObject object) {
          return (String)object.keySet().toArray()[0];
+     }
+
+     private String generateExpression(JSONObject root, String operator, String attribute) {
+         JSONArray conditionsArray = root.getJSONArray(attribute);
+         StringBuilder result = new StringBuilder(" ( ");
+         for(int i = 0; i < conditionsArray.length(); i++) {
+             String parsed = this._build(conditionsArray.getJSONObject(i));
+             result.append(" ").append(parsed);
+             if(i != conditionsArray.length() - 1) {
+                 result.append(" ").append(operator).append(" ");
+             }
+         }
+         result.append(" ) ");
+         return result.toString();
+     }
+
+     private String buildSimpleExpression(String columnName, String operator, Object value) {
+        if(value instanceof String) {
+            return " ( " + columnName + " " + operator + " '" + value + "' ) ";
+        } else {
+            return " ( " + columnName + " " + operator + " " + value + " ) ";
+        }
      }
 }

@@ -50,8 +50,8 @@ public class WhereClauseBuilderTest {
 
     @Test
     public void testNestedExpressions() {
-        JSONObject object = new JSONObject("{$and:[{$or: [{address:{$eq: 11}},{address: {$eq: 12}},{address: {$eq:13}}]},{phone: {$eq: 53}}]}");
+        JSONObject object = new JSONObject("{$and:[{$or: [{address:{$eq: \"mordor\"}},{address: {$eq: 12}},{address: {$eq:\"address with space\"}}]},{phone: {$eq: 53}}]}");
         WhereClauseBuilder whereClauseBuilder = new WhereClauseBuilder(object);
-        Assert.assertEquals("( ( ( address = 11 ) OR ( address = 12 ) OR ( address = 13 ) ) AND ( phone = 53 ) )", whereClauseBuilder.build());
+        Assert.assertEquals("( ( ( address = 'mordor' ) OR ( address = 12 ) OR ( address = 'address with space' ) ) AND ( phone = 53 ) )", whereClauseBuilder.build());
     }
 }
