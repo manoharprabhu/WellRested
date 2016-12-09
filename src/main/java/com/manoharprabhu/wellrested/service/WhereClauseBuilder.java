@@ -1,5 +1,6 @@
 package com.manoharprabhu.wellrested.service;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -29,23 +30,45 @@ public class WhereClauseBuilder {
     }
 
     public String build() {
-        return this._build(this.clauseJson);
+        return this._build(this.clauseJson).trim().replaceAll(" +", " ");
     }
 
     private String _build(JSONObject root) {
-        if(root.keySet().size() != 1) {
+        if(!this.doesObjectContainSingleAttribute(root)) {
             return null;
         }
 
         if(root.keySet().contains("$and")) {
             // Loop through the value array and build expression for each value with AND separator
+            JSONArray conditionsArray = root.getJSONArray("$and");
+            StringBuilder result = new StringBuilder(" ( ");
+            for(int i = 0; i < conditionsArray.length(); i++) {
+                String parsed = this._build(conditionsArray.getJSONObject(i));
+                result.append(" ").append(parsed);
+                if(i != conditionsArray.length() - 1) {
+                    result.append(" AND ");
+                }
+            }
+            result.append(" ) ");
+            return result.toString();
         } else if(root.keySet().contains("$or")) {
-            // Loop through the value array and build expression for each value with OR separator
+            // Loop through the value array and build expression for each value with AND separator
+            JSONArray conditionsArray = root.getJSONArray("$or");
+            StringBuilder result = new StringBuilder(" ( ");
+            for(int i = 0; i < conditionsArray.length(); i++) {
+                String parsed = this._build(conditionsArray.getJSONObject(i));
+                result.append(" ").append(parsed);
+                if(i != conditionsArray.length() - 1) {
+                    result.append(" OR ");
+                }
+            }
+            result.append(" ) ");
+            return result.toString();
         } else {
             // Parse and return the single expression value
-            String columnName = (String)root.keySet().toArray()[0];
+            String columnName = this.getFirstAttributeName(root);
             JSONObject conditionJson = (JSONObject) root.get(columnName);
-            if(conditionJson.keySet().size() != 1) {
+            if(!this.doesObjectContainSingleAttribute(conditionJson)) {
                 return null;
             }
             if(conditionJson.keySet().contains("$eq")) {
@@ -58,6 +81,13 @@ public class WhereClauseBuilder {
                 return null;
             }
         }
-        return null;
+     }
+
+     private boolean doesObjectContainSingleAttribute(JSONObject object) {
+        return (object.keySet().size() == 1);
+     }
+
+     private String getFirstAttributeName(JSONObject object) {
+         return (String)object.keySet().toArray()[0];
      }
 }
