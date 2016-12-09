@@ -5,11 +5,9 @@ import com.manoharprabhu.wellrested.service.MySQLDatabaseServiceImpl;
 import com.manoharprabhu.wellrested.vo.Column;
 import com.manoharprabhu.wellrested.vo.Table;
 import com.manoharprabhu.wellrested.vo.TableRow;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import javax.xml.ws.Response;
 import java.util.List;
 
 /**

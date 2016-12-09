@@ -1,6 +1,5 @@
 package com.manoharprabhu.wellrested;
 
-import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.springframework.boot.SpringApplication;
@@ -9,8 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by manoharprabhu on 12/7/2016.

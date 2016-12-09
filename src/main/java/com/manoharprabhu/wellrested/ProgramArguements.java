@@ -1,7 +1,6 @@
 package com.manoharprabhu.wellrested;
 
 import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 
 /**

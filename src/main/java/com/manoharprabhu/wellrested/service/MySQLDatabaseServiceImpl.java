@@ -35,8 +35,7 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
     @Override
     public Connection getConnectionToDatabase(String database, String hostName, int port, String username, String password) {
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://" + hostName + ":" + port + "/" + database + "?user=" + username + "&password=" + password);
-            return connection;
+            return DriverManager.getConnection("jdbc:mysql://" + hostName + ":" + port + "/" + database + "?user=" + username + "&password=" + password);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

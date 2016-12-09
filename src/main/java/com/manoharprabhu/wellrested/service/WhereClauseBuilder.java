@@ -34,7 +34,7 @@ public class WhereClauseBuilder {
     }
 
     private String _build(JSONObject root) {
-        if(!this.doesObjectContainSingleAttribute(root)) {
+        if(this.doesObjectContainMultipleAttribute(root)) {
             return null;
         }
 
@@ -68,7 +68,7 @@ public class WhereClauseBuilder {
             // Parse and return the single expression value
             String columnName = this.getFirstAttributeName(root);
             JSONObject conditionJson = (JSONObject) root.get(columnName);
-            if(!this.doesObjectContainSingleAttribute(conditionJson)) {
+            if(this.doesObjectContainMultipleAttribute(conditionJson)) {
                 return null;
             }
             if(conditionJson.keySet().contains("$eq")) {
@@ -83,8 +83,8 @@ public class WhereClauseBuilder {
         }
      }
 
-     private boolean doesObjectContainSingleAttribute(JSONObject object) {
-        return (object.keySet().size() == 1);
+     private boolean doesObjectContainMultipleAttribute(JSONObject object) {
+        return (object.keySet().size() != 1);
      }
 
      private String getFirstAttributeName(JSONObject object) {
