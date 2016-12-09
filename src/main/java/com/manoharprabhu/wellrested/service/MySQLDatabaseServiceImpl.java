@@ -3,6 +3,10 @@ package com.manoharprabhu.wellrested.service;
 import com.manoharprabhu.wellrested.vo.Column;
 import com.manoharprabhu.wellrested.vo.Table;
 import com.manoharprabhu.wellrested.vo.TableRow;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,6 +16,8 @@ import java.util.List;
  * Created by manoharprabhu on 12/8/2016.
  */
 public class MySQLDatabaseServiceImpl implements DatabaseService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public List<Table> getListOfAvailableTables(String database, String hostName, int port, String username, String password) {
@@ -64,7 +70,32 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password) {
-        return null;
+    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions) {
+        String columnsToSelect = new SelectColumnBuilder(columns).build();
+        String conditionsToApply = new WhereClauseBuilder(conditions).build();
+        String sqlToRun = "SELECT " + columnsToSelect + " FROM " + table + " WHERE " + conditionsToApply;
+        logger.info("Running query: " + sqlToRun);
+        Connection connection = null;
+        List<TableRow> tableRowList = new ArrayList<>();
+        try {
+            connection = this.getConnectionToDatabase(database, hostName, port, username, password);
+            PreparedStatement statement = connection.prepareStatement(sqlToRun);
+            ResultSet resultSet = statement.executeQuery();
+            int colCount = resultSet.getMetaData().getColumnCount();
+            logger.info("Column count: " + colCount);
+            while(resultSet.next()) {
+                TableRow tableRow = new TableRow();
+                for(int i = 0; i < colCount; i++) {
+                    logger.info("Column name: " + resultSet.getMetaData().getColumnLabel(i + 1) + ", Column value: " + resultSet.getString(i + 1));
+                    tableRow.addColumn(resultSet.getMetaData().getColumnLabel(i + 1), resultSet.getString(i + 1));
+                }
+                tableRowList.add(tableRow);
+            }
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return tableRowList;
     }
 }

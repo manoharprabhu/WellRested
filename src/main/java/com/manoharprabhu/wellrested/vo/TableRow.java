@@ -1,5 +1,6 @@
 package com.manoharprabhu.wellrested.vo;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -7,17 +8,17 @@ import java.util.Map;
  */
 public class TableRow {
 
-    public TableRow(Map<String, String> tableRow) {
-        this.tableRow = tableRow;
+    public TableRow() {
+        this.tableRow = new HashMap<>();
     }
+
+    public void addColumn(String key, String value) {
+        this.getTableRow().put(key, value);
+    }
+
+    private Map<String, String> tableRow;
 
     public Map<String, String> getTableRow() {
         return tableRow;
     }
-
-    public void setTableRow(Map<String, String> tableRow) {
-        this.tableRow = tableRow;
-    }
-
-    private Map<String, String> tableRow;
 }

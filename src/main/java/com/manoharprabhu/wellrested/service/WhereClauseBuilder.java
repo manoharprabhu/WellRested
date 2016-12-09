@@ -24,12 +24,12 @@ import org.json.JSONObject;
  */
 public class WhereClauseBuilder {
     private static final String $_AND = "$and";
-    public static final String $_OR = "$or";
-    public static final String $_EQ = "$eq";
-    public static final String $_GT = "$gt";
-    public static final String $_LT = "$lt";
-    public static final String AND = "AND";
-    public static final String OR = "OR";
+    private static final String $_OR = "$or";
+    private static final String $_EQ = "$eq";
+    private static final String $_GT = "$gt";
+    private static final String $_LT = "$lt";
+    private static final String AND = "AND";
+    private static final String OR = "OR";
     private JSONObject clauseJson;
 
     public WhereClauseBuilder(JSONObject clauseJson) {
@@ -37,10 +37,14 @@ public class WhereClauseBuilder {
     }
 
     public String build() {
+        if(this.clauseJson.keySet().size() == 0) {
+            return " ( 1 = 1 ) ";
+        }
         return this._build(this.clauseJson).trim().replaceAll(" +", " ");
     }
 
     private String _build(JSONObject root) {
+        // Only 1 root operator or comparision clause possible
         if(this.doesObjectContainMultipleAttribute(root)) {
             return null;
         }
