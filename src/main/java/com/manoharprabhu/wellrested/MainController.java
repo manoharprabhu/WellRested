@@ -7,9 +7,12 @@ import com.manoharprabhu.wellrested.vo.Table;
 import com.manoharprabhu.wellrested.vo.TableRow;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -34,19 +37,20 @@ public class MainController {
      * @return List of tables
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public List<Table> listOfAvailableTables() {
-        return databaseService.getListOfAvailableTables(
+    public ResponseEntity listOfAvailableTables() {
+        List<Table> result = databaseService.getListOfAvailableTables(
                 Configuration.database,
                 Configuration.hostName,
                 Configuration.port,
                 Configuration.username,
                 Configuration.password
         );
+        return ResponseEntity.ok(result);
     }
 
     @RequestMapping(value = "/{table}/columns", method = RequestMethod.GET)
-    public List<Column> listOfColumnsOnTable(@PathVariable("table") String table) {
-        return databaseService.getColumnInformationForTable(
+    public ResponseEntity listOfColumnsOnTable(@PathVariable("table") String table) {
+        List<Column> result = databaseService.getColumnInformationForTable(
                 table,
                 Configuration.database,
                 Configuration.hostName,
@@ -54,6 +58,7 @@ public class MainController {
                 Configuration.username,
                 Configuration.password
         );
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -75,32 +80,47 @@ public class MainController {
      * @return list of rows selected from the table satisfying the condition
      */
     @RequestMapping(value = "/{table}/data", method = RequestMethod.POST)
-    public List<TableRow> selectDataFromTable(@PathVariable("table") String table, @RequestBody String payload) {
-        JSONObject payloadJSON = new JSONObject(payload);
+    public ResponseEntity selectDataFromTable(@PathVariable("table") String table, @RequestBody(required = false) String payload) {
+
+        JSONObject payloadJSON;
         JSONArray columns;
         JSONObject conditions;
-        try {
-            columns = payloadJSON.getJSONArray("columns");
-        } catch (Exception e) {
+
+        if(payload == null) {
             columns = new JSONArray();
+            conditions = new JSONObject();
+        } else {
+            payloadJSON = new JSONObject(payload);
+            try {
+                columns = payloadJSON.getJSONArray("columns");
+            } catch (Exception e) {
+                columns = new JSONArray();
+            }
+
+            try {
+                conditions = payloadJSON.getJSONObject("conditions");
+            } catch (Exception e) {
+                conditions = new JSONObject();
+            }
         }
 
         try {
-            conditions = payloadJSON.getJSONObject("conditions");
+            List<TableRow> result = databaseService.getDataFromTable(
+                    table,
+                    Configuration.database,
+                    Configuration.hostName,
+                    Configuration.port,
+                    Configuration.username,
+                    Configuration.password,
+                    columns,
+                    conditions
+            );
+            return ResponseEntity.ok(result);
+        } catch(SQLException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getSQLState());
         } catch (Exception e) {
-            conditions = new JSONObject();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Check the conditions in JSON for syntax errors.");
         }
-
-        return databaseService.getDataFromTable(
-                table,
-                Configuration.database,
-                Configuration.hostName,
-                Configuration.port,
-                Configuration.username,
-                Configuration.password,
-                columns,
-                conditions
-        );
     }
 
 }

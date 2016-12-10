@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -16,5 +17,5 @@ public interface DatabaseService {
     public List<Table> getListOfAvailableTables(String database, String hostName, int port, String username, String password);
     public Connection getConnectionToDatabase(String database, String hostName, int port, String username, String password);
     public List<Column> getColumnInformationForTable(String table, String database, String hostName, int port, String username, String password);
-    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions);
+    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions) throws SQLException;
 }

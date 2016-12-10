@@ -70,10 +70,10 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions) {
+    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions) throws SQLException {
         String columnsToSelect = new SelectColumnBuilder(columns).build();
         String conditionsToApply = new WhereClauseBuilder(conditions).build();
-        String sqlToRun = "SELECT " + columnsToSelect + " FROM " + table + " WHERE " + conditionsToApply;
+        String sqlToRun = "SELECT " + columnsToSelect + " FROM `" + table + "` WHERE " + conditionsToApply;
         logger.info("Running query: " + sqlToRun);
         Connection connection = null;
         List<TableRow> tableRowList = new ArrayList<>();
@@ -94,7 +94,7 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
+            throw e;
         }
         return tableRowList;
     }

@@ -13,13 +13,16 @@ public class SelectColumnBuilder {
     }
 
     public String build() {
+        if(columns == null || columns.length() == 0) {
+            return "*";
+        }
         StringBuilder builder = new StringBuilder();
         for(int i = 0; i < this.columns.length(); i++) {
             String column = this.columns.getString(i);
             if("*".equals(column)) {
                 return "*";
             }
-            builder.append(column);
+            builder.append("`").append(column.replace("`","``")).append("`");
             if(i != this.columns.length() - 1) {
                 builder.append(",");
             }

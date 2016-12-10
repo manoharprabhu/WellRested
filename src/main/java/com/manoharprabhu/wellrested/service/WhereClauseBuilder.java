@@ -98,9 +98,9 @@ public class WhereClauseBuilder {
 
      private String buildSimpleExpression(String columnName, String operator, Object value) {
         if(value instanceof String) {
-            return " ( " + columnName + " " + operator + " '" + value + "' ) ";
+            return " ( `" + columnName + "` " + operator + " '" + value + "' ) ";
         } else {
-            return " ( " + columnName + " " + operator + " " + value + " ) ";
+            return " ( `" + columnName + "` " + operator + " " + value + " ) ";
         }
      }
 }
