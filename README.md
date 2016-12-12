@@ -1,3 +1,3 @@
-A Spring boot application to expose and RDBMS as a REST service.
+A Spring boot application to expose a Relation database as a REST service. Currently supports MYSQL.
 
 Work in progress, documentation in progress.
