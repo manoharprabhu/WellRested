@@ -1,9 +1,14 @@
 package com.manoharprabhu.wellrested;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,10 +20,11 @@ import java.sql.SQLException;
 
 @SpringBootApplication
 public class Application {
+    private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws CmdLineException, ClassNotFoundException, SQLException {
         try {
-            System.out.println("Validating passed arguments...");
+            logger.info("Validating passed arguments...");
             parseArguements(args);
         } catch(CmdLineException e) {
             e.getParser().printUsage(System.out);
@@ -26,7 +32,7 @@ public class Application {
         }
 
         try {
-            System.out.println("Loading database drivers...");
+            logger.info("Loading database drivers...");
             loadDatabaseDrivers();
         } catch(ClassNotFoundException e) {
             e.printStackTrace();
@@ -34,13 +40,13 @@ public class Application {
         }
 
         try {
-            System.out.println("Testing connection to the database...");
+            logger.info("Testing connection to the database...");
             testConnectionToDatabase();
         } catch(SQLException e) {
             e.printStackTrace();
             throw e;
         }
-        System.out.println("Starting the REST services to the database...");
+        logger.info("Starting the REST services to the database...");
         SpringApplication.run(Application.class, args);
     }
 

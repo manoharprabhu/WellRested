@@ -85,10 +85,11 @@ public class MainController {
         JSONObject payloadJSON;
         JSONArray columns;
         JSONObject conditions;
-
+        JSONObject limits;
         if(payload == null) {
             columns = new JSONArray();
             conditions = new JSONObject();
+            limits = new JSONObject();
         } else {
             payloadJSON = new JSONObject(payload);
             try {
@@ -102,6 +103,12 @@ public class MainController {
             } catch (Exception e) {
                 conditions = new JSONObject();
             }
+
+            try {
+                limits = payloadJSON.getJSONObject("limits");
+            } catch (Exception e) {
+                limits = new JSONObject();
+            }
         }
 
         try {
@@ -113,11 +120,10 @@ public class MainController {
                     Configuration.username,
                     Configuration.password,
                     columns,
-                    conditions
+                    conditions,
+                    limits
             );
             return ResponseEntity.ok(result);
-        } catch(SQLException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getSQLState());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Check the conditions in JSON for syntax errors.");
         }

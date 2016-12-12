@@ -1,5 +1,6 @@
 package com.manoharprabhu.wellrested.service;
 
+import com.manoharprabhu.wellrested.Configuration;
 import com.manoharprabhu.wellrested.vo.Column;
 import com.manoharprabhu.wellrested.vo.Table;
 import com.manoharprabhu.wellrested.vo.TableRow;
@@ -63,17 +64,18 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
             }
             connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error while getting the column names.", e);
             return null;
         }
         return columns;
     }
 
     @Override
-    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions) throws SQLException {
+    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions, JSONObject limits) throws SQLException {
         String columnsToSelect = new SelectColumnBuilder(columns).build();
         String conditionsToApply = new WhereClauseBuilder(conditions).build();
-        String sqlToRun = "SELECT " + columnsToSelect + " FROM `" + table + "` WHERE " + conditionsToApply;
+        String rowsLimitString = new RowsLimitBuilder(limits, Configuration.databaseType).build();
+        String sqlToRun = "SELECT " + columnsToSelect + " FROM `" + table + "` WHERE " + conditionsToApply + " " + rowsLimitString;
         logger.info("Running query: " + sqlToRun);
         Connection connection = null;
         List<TableRow> tableRowList = new ArrayList<>();
@@ -86,14 +88,13 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
             while(resultSet.next()) {
                 TableRow tableRow = new TableRow();
                 for(int i = 0; i < colCount; i++) {
-                    logger.info("Column name: " + resultSet.getMetaData().getColumnLabel(i + 1) + ", Column value: " + resultSet.getString(i + 1));
                     tableRow.addColumn(resultSet.getMetaData().getColumnLabel(i + 1), resultSet.getString(i + 1));
                 }
                 tableRowList.add(tableRow);
             }
             connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLSyntaxErrorException e) {
+            logger.error("SQL Syntax is incorrect. Check the request JSON and make sure it is constructed properly.", e);
             throw e;
         }
         return tableRowList;
