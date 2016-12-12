@@ -21,14 +21,14 @@ public class SelectColumnBuilderTest {
     public void testSingleColumn() {
         JSONArray jsonArray = new JSONArray("[\"name\"]");
         SelectColumnBuilder selectColumnBuilder = new SelectColumnBuilder(jsonArray);
-        Assert.assertEquals("name", selectColumnBuilder.build());
+        Assert.assertEquals("`name`", selectColumnBuilder.build());
     }
 
     @Test
     public void testMultipleColumn() {
         JSONArray jsonArray = new JSONArray("[\"name\", \"age\", \"address\"]");
         SelectColumnBuilder selectColumnBuilder = new SelectColumnBuilder(jsonArray);
-        Assert.assertEquals("name,age,address", selectColumnBuilder.build());
+        Assert.assertEquals("`name`,`age`,`address`", selectColumnBuilder.build());
     }
 
     @Test

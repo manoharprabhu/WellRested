@@ -23,18 +23,41 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
     @Override
     public List<Table> getListOfAvailableTables(String database, String hostName, int port, String username, String password) {
         Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
         List<Table> tables = new ArrayList<>();
         try {
             connection = this.getConnectionToDatabase(database, hostName, port, username, password);
-            PreparedStatement statement = connection.prepareStatement("SHOW TABLES");
-            ResultSet resultSet = statement.executeQuery();
+            statement = connection.prepareStatement("SHOW TABLES");
+            resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 tables.add(new Table(resultSet.getString(1)));
             }
-            connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        } finally {
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
+            if(statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
+            if(resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
         }
         return tables;
     }
@@ -52,20 +75,43 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
     @Override
     public List<Column> getColumnInformationForTable(String table, String database, String hostName, int port, String username, String password) {
         Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
         List<Column> columns = new ArrayList<>();
         try {
             connection = this.getConnectionToDatabase(database, hostName, port, username, password);
-            PreparedStatement statement = connection.prepareStatement("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?");
+            statement = connection.prepareStatement("SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?");
             statement.setString(1, database);
             statement.setString(2, table);
-            ResultSet resultSet = statement.executeQuery();
+            resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 columns.add(new Column(resultSet.getString("DATA_TYPE"), resultSet.getString("COLUMN_NAME")));
             }
-            connection.close();
         } catch (SQLException e) {
             logger.error("Error while getting the column names.", e);
             return null;
+        }  finally {
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
+            if(statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
+            if(resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
         }
         return columns;
     }
@@ -78,11 +124,13 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
         String sqlToRun = "SELECT " + columnsToSelect + " FROM `" + table + "` WHERE " + conditionsToApply + " " + rowsLimitString;
         logger.info("Running query: " + sqlToRun);
         Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement statement = null;
         List<TableRow> tableRowList = new ArrayList<>();
         try {
             connection = this.getConnectionToDatabase(database, hostName, port, username, password);
-            PreparedStatement statement = connection.prepareStatement(sqlToRun);
-            ResultSet resultSet = statement.executeQuery();
+            statement = connection.prepareStatement(sqlToRun);
+            resultSet = statement.executeQuery();
             int colCount = resultSet.getMetaData().getColumnCount();
             logger.info("Column count: " + colCount);
             while(resultSet.next()) {
@@ -92,10 +140,31 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
                 }
                 tableRowList.add(tableRow);
             }
-            connection.close();
         } catch (SQLSyntaxErrorException e) {
             logger.error("SQL Syntax is incorrect. Check the request JSON and make sure it is constructed properly.", e);
             throw e;
+        }  finally {
+            if(connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
+            if(statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
+            if(resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
         }
         return tableRowList;
     }
