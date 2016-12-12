@@ -10,6 +10,14 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class SelectColumnBuilderTest {
+
+    @Test
+    public void testEmpty() {
+        JSONArray jsonArray = new JSONArray("[]");
+        SelectColumnBuilder selectColumnBuilder = new SelectColumnBuilder(jsonArray);
+        Assert.assertEquals("*", selectColumnBuilder.build());
+    }
+
     @Test
     public void testStar() {
         JSONArray jsonArray = new JSONArray("[\"*\"]");

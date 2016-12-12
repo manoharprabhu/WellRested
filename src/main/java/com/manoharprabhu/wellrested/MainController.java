@@ -78,7 +78,7 @@ public class MainController {
      * @param payload
      * @return list of rows selected from the table satisfying the condition
      */
-    @RequestMapping(value = "/{table}/data", method = RequestMethod.POST)
+    @RequestMapping(value = "/{table}/getdata", method = RequestMethod.POST)
     public ResponseEntity selectDataFromTable(@PathVariable("table") String table, @RequestBody(required = false) String payload) {
 
         JSONObject payloadJSON;
