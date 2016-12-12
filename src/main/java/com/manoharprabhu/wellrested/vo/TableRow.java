@@ -1,5 +1,7 @@
 package com.manoharprabhu.wellrested.vo;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +20,7 @@ public class TableRow {
 
     private Map<String, String> tableRow;
 
+    @JsonValue
     public Map<String, String> getTableRow() {
         return tableRow;
     }

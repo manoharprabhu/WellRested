@@ -1,14 +1,11 @@
 package com.manoharprabhu.wellrested;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,11 +14,9 @@ import java.sql.SQLException;
 /**
  * Created by manoharprabhu on 12/7/2016.
  */
-
 @SpringBootApplication
 public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
-
     public static void main(String[] args) throws CmdLineException, ClassNotFoundException, SQLException {
         try {
             logger.info("Validating passed arguments...");
