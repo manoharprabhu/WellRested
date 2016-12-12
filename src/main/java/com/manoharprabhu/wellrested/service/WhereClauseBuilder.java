@@ -38,7 +38,7 @@ public class WhereClauseBuilder {
 
     public String build() {
         if(this.clauseJson.keySet().size() == 0) {
-            return " ( 1 = 1 ) ";
+            return "( 1 = 1 )";
         }
         return this._build(this.clauseJson).trim().replaceAll(" +", " ");
     }
@@ -46,7 +46,7 @@ public class WhereClauseBuilder {
     private String _build(JSONObject root) {
         // Only 1 root operator or comparision clause possible
         if(this.doesObjectContainMultipleAttribute(root)) {
-            return null;
+            return "( 1 = 0 )";
         }
 
         if(root.keySet().contains($_AND)) {
@@ -60,7 +60,7 @@ public class WhereClauseBuilder {
             String columnName = this.getFirstAttributeName(root);
             JSONObject conditionJson = (JSONObject) root.get(columnName);
             if(this.doesObjectContainMultipleAttribute(conditionJson)) {
-                return null;
+                return "( 1 = 0 )";
             }
             if(conditionJson.keySet().contains($_EQ)) {
                 return this.buildSimpleExpression(columnName, " = ", conditionJson.get($_EQ));
@@ -69,7 +69,7 @@ public class WhereClauseBuilder {
             } else if(conditionJson.keySet().contains($_LT)) {
                 return this.buildSimpleExpression(columnName, " < ", conditionJson.get($_LT));
             } else {
-                return null;
+                return "( 1 = 0 )";
             }
         }
      }

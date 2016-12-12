@@ -54,4 +54,33 @@ public class WhereClauseBuilderTest {
         WhereClauseBuilder whereClauseBuilder = new WhereClauseBuilder(object);
         Assert.assertEquals("( ( ( `address` = 'mordor' ) OR ( `address` = 12 ) OR ( `address` = 'address with space' ) ) AND ( `phone` = 53 ) )", whereClauseBuilder.build());
     }
+
+
+    @Test
+    public void testNoClauseExpressions() {
+        JSONObject object = new JSONObject("{}");
+        WhereClauseBuilder whereClauseBuilder = new WhereClauseBuilder(object);
+        Assert.assertEquals("( 1 = 1 )", whereClauseBuilder.build());
+    }
+
+    @Test
+    public void testMultipleRootExpressions() {
+        JSONObject object = new JSONObject("{$and:[{a: {$eq: 1}}],$or:[{b: {$eq: 2}}]}");
+        WhereClauseBuilder whereClauseBuilder = new WhereClauseBuilder(object);
+        Assert.assertEquals("( 1 = 0 )", whereClauseBuilder.build());
+    }
+
+    @Test
+    public void testMultipleInnerExpressions() {
+        JSONObject object = new JSONObject("{$and:[{a: {$eq: 1, $gt: 2}},{c: {$eq: 1}}]}");
+        WhereClauseBuilder whereClauseBuilder = new WhereClauseBuilder(object);
+        Assert.assertEquals("( ( 1 = 0 ) AND ( `c` = 1 ) )", whereClauseBuilder.build());
+    }
+
+    @Test
+    public void testUndefinedOperatorExpressions() {
+        JSONObject object = new JSONObject("{$and:[{a: {$lol: 1}},{c: {$eq: 1}}]}");
+        WhereClauseBuilder whereClauseBuilder = new WhereClauseBuilder(object);
+        Assert.assertEquals("( ( 1 = 0 ) AND ( `c` = 1 ) )", whereClauseBuilder.build());
+    }
 }
