@@ -30,7 +30,6 @@ public class Application {
             logger.info("Loading database drivers...");
             loadDatabaseDrivers();
         } catch(ClassNotFoundException e) {
-            e.printStackTrace();
             throw e;
         }
 
@@ -54,7 +53,13 @@ public class Application {
 
     private static void populateConfigurationFromArguements(ProgramArguements arguements) {
         Configuration.database = arguements.getDatabase();
-        Configuration.databaseType = (arguements.getType() == 1) ? DatabaseType.MYSQL : null;
+        if(arguements.getType() == 1) {
+            Configuration.databaseType = DatabaseType.MYSQL;
+        } else if(arguements.getType() == 2) {
+            Configuration.databaseType = DatabaseType.SQLSERVER;
+        } else {
+            Configuration.databaseType = null;
+        }
         Configuration.hostName = arguements.getHostName();
         Configuration.username = arguements.getUsername();
         Configuration.password = arguements.getPassword();
@@ -63,10 +68,26 @@ public class Application {
 
     private static void loadDatabaseDrivers() throws ClassNotFoundException {
         Class.forName("org.mariadb.jdbc.Driver");
+        Class.forName("net.sourceforge.jtds.jdbc.Driver");
     }
 
     private static void testConnectionToDatabase() throws SQLException {
-        Connection connection = DriverManager.getConnection("jdbc:mysql://" + Configuration.hostName + ":" + Configuration.port + "/" + Configuration.database + "?user=" + Configuration.username + "&password=" + Configuration.password);
-        connection.close();
+        Connection connection = null;
+        try {
+            if (Configuration.databaseType == DatabaseType.MYSQL) {
+                connection = DriverManager.getConnection("jdbc:mysql://" + Configuration.hostName + ":" + Configuration.port + "/" + Configuration.database + "?user=" + Configuration.username + "&password=" + Configuration.password);
+            } else if (Configuration.databaseType == DatabaseType.SQLSERVER) {
+                connection = DriverManager.getConnection("jdbc:jtds:sqlserver://" + Configuration.hostName + ":" + Configuration.port + "/" + Configuration.database + ";user=" + Configuration.username + ";password=" + Configuration.password + ";TDS=7.0");
+            } else {
+                logger.error("Invalid database type passed.");
+                throw new SQLException();
+            }
+        } catch(SQLException e) {
+            logger.error("Error while getting connection to the database", e);
+            throw e;
+        } finally {
+            connection.close();
+        }
+
     }
 }

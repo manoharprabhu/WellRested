@@ -2,6 +2,7 @@ package com.manoharprabhu.wellrested;
 
 import com.manoharprabhu.wellrested.service.DatabaseService;
 import com.manoharprabhu.wellrested.service.MySQLDatabaseServiceImpl;
+import com.manoharprabhu.wellrested.service.SQLServerDatabaseServiceImpl;
 import com.manoharprabhu.wellrested.vo.Column;
 import com.manoharprabhu.wellrested.vo.Table;
 import com.manoharprabhu.wellrested.vo.TableRow;
@@ -26,8 +27,8 @@ public class MainController {
     public void initialize() {
         if(Configuration.databaseType == DatabaseType.MYSQL) {
             this.databaseService = new MySQLDatabaseServiceImpl();
-        } else {
-            //TODO: Add more database support
+        } else if(Configuration.databaseType == DatabaseType.SQLSERVER){
+            this.databaseService = new SQLServerDatabaseServiceImpl();
         }
     }
 
