@@ -119,6 +119,7 @@ public class MainController {
                     Configuration.port,
                     Configuration.username,
                     Configuration.password,
+                    Configuration.databaseType,
                     columns,
                     conditions,
                     limits

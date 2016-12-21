@@ -1,5 +1,6 @@
 package com.manoharprabhu.wellrested.service;
 
+import com.manoharprabhu.wellrested.DatabaseType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,19 +34,20 @@ public class WhereClauseBuilder {
     public static final String ALL_MATCHING_EXPRESSION = "( 1 = 1 )";
     public static final String NO_MATCHING_EXPRESSION = "( 1 = 0 )";
     private JSONObject clauseJson;
+    private DatabaseType databaseType;
 
-    public WhereClauseBuilder(JSONObject clauseJson) {
-        this.clauseJson = clauseJson;
+    public WhereClauseBuilder(JSONObject clauseJson, DatabaseType databaseType) {
+        this.clauseJson = clauseJson;this.databaseType = databaseType;
     }
 
     public String build() {
         if(this.clauseJson.keySet().size() == 0) {
             return ALL_MATCHING_EXPRESSION;
         }
-        return this._build(this.clauseJson).trim().replaceAll(" +", " ");
+        return this._build(this.clauseJson, databaseType).trim().replaceAll(" +", " ");
     }
 
-    private String _build(JSONObject root) {
+    private String _build(JSONObject root, DatabaseType databaseType) {
         // Only 1 root operator or comparision clause possible
         if(this.doesObjectContainMultipleAttribute(root)) {
             return NO_MATCHING_EXPRESSION;
@@ -53,10 +55,10 @@ public class WhereClauseBuilder {
 
         if(root.keySet().contains($_AND)) {
             // Loop through the value array and build expression for each value with AND separator
-            return this.generateExpression(root, AND, $_AND);
+            return this.generateExpression(root, AND, $_AND, databaseType);
         } else if(root.keySet().contains($_OR)) {
             // Loop through the value array and build expression for each value with AND separator
-            return this.generateExpression(root, OR, $_OR);
+            return this.generateExpression(root, OR, $_OR, databaseType);
         } else {
             // Parse and return the single expression value
             String columnName = this.getFirstAttributeName(root);
@@ -65,11 +67,11 @@ public class WhereClauseBuilder {
                 return NO_MATCHING_EXPRESSION;
             }
             if(conditionJson.keySet().contains($_EQ)) {
-                return this.buildSimpleExpression(columnName, " = ", conditionJson.get($_EQ));
+                return this.buildSimpleExpression(columnName, " = ", conditionJson.get($_EQ), databaseType);
             } else if(conditionJson.keySet().contains($_GT)) {
-                return this.buildSimpleExpression(columnName, " > ", conditionJson.get($_GT));
+                return this.buildSimpleExpression(columnName, " > ", conditionJson.get($_GT), databaseType);
             } else if(conditionJson.keySet().contains($_LT)) {
-                return this.buildSimpleExpression(columnName, " < ", conditionJson.get($_LT));
+                return this.buildSimpleExpression(columnName, " < ", conditionJson.get($_LT), databaseType);
             } else {
                 return NO_MATCHING_EXPRESSION;
             }
@@ -84,11 +86,11 @@ public class WhereClauseBuilder {
          return (String)object.keySet().toArray()[0];
      }
 
-     private String generateExpression(JSONObject root, String operator, String attribute) {
+     private String generateExpression(JSONObject root, String operator, String attribute, DatabaseType databaseType) {
          JSONArray conditionsArray = root.getJSONArray(attribute);
          StringBuilder result = new StringBuilder(" ( ");
          for(int i = 0; i < conditionsArray.length(); i++) {
-             String parsed = this._build(conditionsArray.getJSONObject(i));
+             String parsed = this._build(conditionsArray.getJSONObject(i), databaseType);
              result.append(" ").append(parsed);
              if(i != conditionsArray.length() - 1) {
                  result.append(" ").append(operator).append(" ");
@@ -98,11 +100,21 @@ public class WhereClauseBuilder {
          return result.toString();
      }
 
-     private String buildSimpleExpression(String columnName, String operator, Object value) {
+     private String buildSimpleExpression(String columnName, String operator, Object value, DatabaseType databaseType) {
+        String openLimiter = "'";
+        String closeLimiter = "'";
+        if(databaseType == DatabaseType.MYSQL) {
+            openLimiter = "`";
+            closeLimiter = "`";
+        } else if(databaseType == DatabaseType.SQLSERVER) {
+            openLimiter = "[";
+            closeLimiter = "]";
+        }
+
         if(value instanceof String) {
-            return " ( `" + columnName + "` " + operator + " '" + value + "' ) ";
+            return " ( "+openLimiter + columnName + closeLimiter + " " + operator + " '" + value + "' ) ";
         } else {
-            return " ( `" + columnName + "` " + operator + " " + value + " ) ";
+            return " ( " + openLimiter + columnName + closeLimiter + " " + operator + " " + value + " ) ";
         }
      }
 }

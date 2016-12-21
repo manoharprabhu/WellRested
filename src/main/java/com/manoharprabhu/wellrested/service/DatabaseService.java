@@ -1,5 +1,6 @@
 package com.manoharprabhu.wellrested.service;
 
+import com.manoharprabhu.wellrested.DatabaseType;
 import com.manoharprabhu.wellrested.vo.Column;
 import com.manoharprabhu.wellrested.vo.Table;
 import com.manoharprabhu.wellrested.vo.TableRow;
@@ -17,5 +18,5 @@ public interface DatabaseService {
     public List<Table> getListOfAvailableTables(String database, String hostName, int port, String username, String password);
     public Connection getConnectionToDatabase(String database, String hostName, int port, String username, String password);
     public List<Column> getColumnInformationForTable(String table, String database, String hostName, int port, String username, String password);
-    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions, JSONObject limits) throws SQLException;
+    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, DatabaseType databaseType, JSONArray columns, JSONObject conditions, JSONObject limits) throws SQLException;
 }

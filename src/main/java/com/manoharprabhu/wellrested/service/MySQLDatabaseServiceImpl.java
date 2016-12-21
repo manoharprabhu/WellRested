@@ -1,6 +1,7 @@
 package com.manoharprabhu.wellrested.service;
 
 import com.manoharprabhu.wellrested.Configuration;
+import com.manoharprabhu.wellrested.DatabaseType;
 import com.manoharprabhu.wellrested.vo.Column;
 import com.manoharprabhu.wellrested.vo.Table;
 import com.manoharprabhu.wellrested.vo.TableRow;
@@ -117,9 +118,9 @@ public class MySQLDatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, JSONArray columns, JSONObject conditions, JSONObject limits) throws SQLException {
+    public List<TableRow> getDataFromTable(String table, String database, String hostName, int port, String username, String password, DatabaseType databaseType, JSONArray columns, JSONObject conditions, JSONObject limits) throws SQLException {
         String columnsToSelect = new SelectColumnBuilder(columns).build();
-        String conditionsToApply = new WhereClauseBuilder(conditions).build();
+        String conditionsToApply = new WhereClauseBuilder(conditions, databaseType).build();
         String rowsLimitString = new RowsLimitBuilder(limits, Configuration.databaseType).build();
         String sqlToRun = "SELECT " + columnsToSelect + " FROM `" + table + "` WHERE " + conditionsToApply + " " + rowsLimitString;
         logger.info("Running query: " + sqlToRun);

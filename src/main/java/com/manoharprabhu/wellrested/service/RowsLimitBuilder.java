@@ -25,6 +25,8 @@ public class RowsLimitBuilder {
 
         if(this.databaseType == DatabaseType.MYSQL) {
             return "LIMIT " + limits.getInt(FROM_ROW) + " ," + limits.getInt(COUNT);
+        } else if(this.databaseType == DatabaseType.SQLSERVER) {
+            return "TOP " + limits.getInt(COUNT);
         } else {
             return "";
         }
